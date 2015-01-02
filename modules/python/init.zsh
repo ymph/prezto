@@ -35,7 +35,7 @@ if (( ! $+commands[python] && ! $+commands[pyenv] )); then
 fi
 
 # Load virtualenvwrapper into the shell session.
-if (( $+commands[virtualenvwrapper_lazy.sh] )); then
+if (( $+commands[virtualenvwrapper.sh] )); then
   # Set the directory where virtual environments are stored.
   if [[ -z "$WORKON_HOME" ]]; then
     export WORKON_HOME="$HOME/.virtualenvs"
@@ -44,7 +44,7 @@ if (( $+commands[virtualenvwrapper_lazy.sh] )); then
   # Disable the virtualenv prompt.
   VIRTUAL_ENV_DISABLE_PROMPT=1
 
-  source "$commands[virtualenvwrapper_lazy.sh]"
+  source "$commands[virtualenvwrapper.sh]"
 fi
 
 #
@@ -52,4 +52,3 @@ fi
 #
 
 alias py='python'
-
