@@ -1,0 +1,98 @@
+#compdef et
+#from compdef ssh slogin=ssh scp ssh-add ssh-agent ssh-copy-id ssh-keygen ssh-keyscan sftp
+
+_et () {
+  local state line expl ret=1 tmp
+  typeset -A opt_args
+
+  case "$service" in
+  et)
+    (( $+words[(r)-[^-]#t*] )) && tdesc=' even if there is no controlling tty'
+    _arguments -C -s \
+    '-h[Print help]' \
+    '--help[Print help]' \
+    '--version[Print version]' \
+    '-U+[Username]:User Name' \
+    '--username+[Username]:User name' \
+    '--host+[Remote host name]: :->userhost' \
+    '-p+[Remote machine port (default: 2022)]:port number on remote host' \
+    '--port+[Remote machine port (default: 2022)]:port number on remote host' \
+    '-c+[Run command on connect]: :->command' \
+    '--command+[Run command on connect]: :->command' \
+    '--prefix+[Add prefix when launching etterminal on server side]:prefix on server'\
+    '-t+[Tunnel: Array of source:destination ports or srcStart-srcEnd:dstStart-dstEnd (inclusive) port ranges (e.g. 10080:80,10443:443, 10090-10092:8000-8002)]:tunnel'\
+    '--tunnel+[Tunnel: Array of source:destination ports or srcStart-srcEnd:dstStart-dstEnd (inclusive) port ranges (e.g. 10080:80,10443:443, 10090-10092:8000-8002)]:tunnel'\
+    '-r+[Reverse Tunnel: Array of source:destination ports or srcStart-srcEnd:dstStart-dstEnd (inclusive) port ranges (e.g. 10080:80,10443:443, 10090-10092:8000-8002)]:tunnel'\
+    '--reversetunnel+[Reverse Tunnel: Array of source:destination ports or srcStart-srcEnd:dstStart-dstEnd (inclusive) port ranges (e.g. 10080:80,10443:443, 10090-10092:8000-8002)]:tunnel'\
+    '--jumphost+[jumphost between localhost and destination]: :->userhost' \
+    '--jport+[Jumphost machine port (default: 2022)]:port number on remote host' \
+    '-x[kill all old sessions belonging to the user]' \
+    '--kill-other-sessions[kill all old sessions belonging to the user]' \
+    '-v+[Enable verbose logging (default: 0)]:verbose level' \
+    '--verbose+[Enable verbose logging (default: 0)]:verbose level' \
+    '--logtostdout[Write log to stdout]' \
+    '--silent[Disable logging]' \
+    '-N[Do not create a terminal]' \
+    '--no-terminal[Do not create a terminal]' \
+    '-f[Forward ssh-agent socket]' \
+    '--forward-ssh-agent[Forward ssh-agent socket]' \
+    '--ssh-socket+[The ssh-agent socket to forward]:ssh agent' \
+    '--serverfifo+[If set, communicate to etserver on the matching fifo name]:fifo name' \
+    ':remote host name:->userhost' && ret=0
+    ;;
+  esac
+
+  while [[ -n "$state" ]]; do
+    lstate="$state"
+    state=''
+
+    case "$lstate" in
+    hostport)
+      if compset -P '*:'; then
+        _message -e port-numbers 'port number'
+        ret=0
+      else
+        _wanted hosts expl host _ssh_hosts -S: && ret=0
+      fi
+      return ret
+      ;;
+    command)
+      if (( $+opt_args[-s] )); then
+	_wanted subsystems expl subsystem compadd sftp
+	return
+      fi
+      local -a _comp_priv_prefix
+      shift 1 words
+      (( CURRENT-- ))
+      _normal
+      return
+      ;;
+    userhost)
+      if compset -P '*@'; then
+        _wanted hosts expl 'remote host name' _ssh_hosts && ret=0
+      elif compset -S '@*'; then
+        _wanted users expl 'login name' _ssh_users -S '' && ret=0
+      else
+        if (( $+opt_args[-l] )); then
+          tmp=()
+        else
+          tmp=( 'users:login name:_ssh_users -qS@' )
+        fi
+        _alternative \
+            'hosts:remote host name:_ssh_hosts' \
+            "$tmp[@]" && ret=0
+      fi
+      ;;
+    esac
+  done
+
+  return ret
+}
+
+_ssh_users () {
+  _combination -s '[:@]' my-accounts users-hosts users "$@"
+}
+
+_et "$@"
+
+compdef _et /usr/local/bin/et

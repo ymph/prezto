@@ -42,7 +42,8 @@ zstyle ':prezto:load' pmodule \
   'git' \
   'osx' \
   'syntax-highlighting' \
-  'poetry'
+  'poetry' \
+  'et'
 
 
 #
