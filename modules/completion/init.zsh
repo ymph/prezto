@@ -13,6 +13,7 @@ fi
 
 # Add zsh-completions to $fpath.
 fpath=(${0:h}/external/src $fpath)
+fpath=(${0:h}/personal/src $fpath)
 
 # Add completion for keg-only brewed curl when available.
 if (( $+commands[brew] )) \
